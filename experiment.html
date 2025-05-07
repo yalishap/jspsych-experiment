@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>My Experiment with jsPsych (Test Mode)</title>
+  <!-- Load jsPsych library and plugins from CDN -->
+  <script src="https://unpkg.com/jspsych@8.0.2"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.0.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-video-keyboard-response@2.0.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.0.0"></script>
+  <link href="https://unpkg.com/jspsych@8.0.2/css/jspsych.css" rel="stylesheet" type="text/css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    video {
+      width: 80%;
+      max-width: 720px;
+      margin-top: 20px;
+    }
+    img {
+      width: 20%;
+      margin: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // Initialize jsPsych
+    const jsPsych = initJsPsych({
+      on_finish: function() {
+        jsPsych.data.get().localSave('csv', 'experiment_data.csv');
+        alert("Experiment Complete. Data saved.");
+      }
+    });
+
+    // Define the timeline
+    const timeline = [];
+
+    // Introduction Video (Using the Same Test Image as Placeholder)
+    const intro_video = {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `<img src="C:/Users/User/Documents/DaVinci_Resolve_19.1.1_Windows_ARM64/פרוייקט מחקר עצמאי/קוד פרוייקט מחקר/media/ילד סמיילי.jpg" style="width: 50%;">`,
+      prompt: "<p>This is the introduction. Press any button to continue.</p>",
+      choices: ['Continue']
+    };
+    timeline.push(intro_video);
+
+    // Stimulus Videos (Using Same Test Image as Placeholder)
+    const stimulus_videos = [
+      "C:/Users/User/Documents/DaVinci_Resolve_19.1.1_Windows_ARM64/פרוייקט מחקר עצמאי/קוד פרוייקט מחקר/media/ילד סמיילי.jpg",
+      "C:/Users/User/Documents/DaVinci_Resolve_19.1.1_Windows_ARM64/פרוייקט מחקר עצמאי/קוד פרוייקט מחקר/media/ילד סמיילי.jpg",
+      "C:/Users/User/Documents/DaVinci_Resolve_19.1.1_Windows_ARM64/פרוייקט מחקר עצמאי/קוד פרוייקט מחקר/media/ילד סמיילי.jpg"
+    ];
+
+    // Room Images for Testing (7 for Each Stimulus)
+    const room_images = [
+      "C:/Users/User/Documents/DaVinci_Resolve_19.1.1_Windows_ARM64/פרוייקט מחקר עצמאי/קוד פרוייקט מחקר/media/ילד סמיילי.jpg"
+    ];
+
+    // Function to create Temporal Order Questions (Using Same Test Image)
+    function createTemporalOrderQuestions(stimulusIndex) {
+      const questions = [];
+      for (let i = 1; i <= 9; i++) {
+        questions.push({
+          type: jsPsychHtmlKeyboardResponse,
+          stimulus: `
+            <p>Temporal Order Question ${i}</p>
+            <img src="C:/Users/User/Documents/DaVinci_Resolve_19.1.1_Windows_ARM64/פרוייקט מחקר עצמאי/קוד פרוייקט מחקר/media/ילד סמיילי.jpg" style="width: 40%; margin-right: 10px;">
+            <img src="C:/Users/User/Documents/DaVinci_Resolve_19.1.1_Windows_ARM64/פרוייקט מחקר עצמאי/קוד פרוייקט מחקר/media/ילד סמיילי.jpg" style="width: 40%;">
+          `,
+          choices: ['1', '2'],
+          data: { question: `Temporal Order - Stimulus ${stimulusIndex} - Q${i}` }
+        });
+      }
+      return questions;
+    }
+
+    // Function to create Associative Memory Questions (Using Same Test Image)
+    function createAssociativeMemoryQuestions(stimulusIndex) {
+      const questions = [];
+      for (let i = 1; i <= 9; i++) {
+        questions.push({
+          type: jsPsychHtmlButtonResponse,
+          stimulus: `<p>Associative Memory Question ${i}</p>
+            <img src="C:/Users/User/Documents/DaVinci_Resolve_19.1.1_Windows_ARM64/פרוייקט מחקר עצמאי/קוד פרוייקט מחקר/media/ילד סמיילי.jpg" style="width: 50%;">`,
+          choices: room_images,
+          button_html: '<button class="jspsych-btn"><img src="%choice%" /></button>',
+          data: { question: `Associative Memory - Stimulus ${stimulusIndex} - Q${i}` },
+          prompt: "<p>Select the room where the action occurred.</p>"
+        });
+      }
+      return questions;
+    }
+
+    // Function to create Temporal Distance Questions (Using Same Test Image)
+    function createTemporalDistanceQuestions(stimulusIndex) {
+      const questions = [];
+      for (let i = 1; i <= 9; i++) {
+        questions.push({
+          type: jsPsychHtmlKeyboardResponse,
+          stimulus: `
+            <p>Temporal Distance Question ${i}</p>
+            <img src="C:/Users/User/Documents/DaVinci_Resolve_19.1.1_Windows_ARM64/פרוייקט מחקר עצמאי/קוד פרוייקט מחקר/media/ילד סמיילי.jpg" style="width: 50%;">
+          `,
+          choices: ['0', '1', '2'],
+          data: { question: `Temporal Distance - Stimulus ${stimulusIndex} - Q${i}` }
+        });
+      }
+      return questions;
+    }
+
+    // Build Experiment Timeline
+    stimulus_videos.forEach((video, index) => {
+      timeline.push({
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<img src="${video}" style="width: 50%;">`,
+        prompt: "<p>Watch the video. Press any button to continue.</p>",
+        choices: ['Continue']
+      });
+
+      timeline.push(
+        ...createTemporalOrderQuestions(index + 1),
+        ...createAssociativeMemoryQuestions(index + 1),
+        ...createTemporalDistanceQuestions(index + 1)
+      );
+    });
+
+    // Start Experiment
+    jsPsych.run(timeline);
+  </script>
+</body>
+</html>
